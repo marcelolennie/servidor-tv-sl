@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaSync Center - Premium TV Dashboard</title>
+    <!-- Tailwind CSS (Framework de Estilo) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome (Ícones) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Configuração de Cores Customizadas (Prime Video Vibe) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F171E',   /* Fundo Principal Escuro */
+                        secondary: '#1A242F', /* Fundo Secundário (Cards/Menu) */
+                        accent: '#00A8E1',    /* Azul Ciano Vibrante */
+                        textMuted: '#8197A4'  /* Cinza para textos secundários */
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Customizando a barra de rolagem para ficar elegante */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0F171E; }
+        ::-webkit-scrollbar-thumb { background: #1A242F; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00A8E1; }
+        
+        /* Efeito de Gradiente no Banner Principal */
+        .hero-gradient { 
+            background: linear-gradient(to top, #0F171E 0%, transparent 80%); 
+        }
+        
+        /* Efeito de Vidro (Glassmorphism) */
+        .glass-panel { 
+            background: rgba(26, 36, 47, 0.6); 
+            backdrop-filter: blur(10px); 
+        }
+    </style>
+</head>
+<body class="bg-primary text-white font-sans flex h-screen overflow-hidden antialiased">
+
+    <!-- MENU LATERAL (SIDEBAR) -->
+    <aside class="w-20 hover:w-64 group bg-secondary flex flex-col justify-between transition-all duration-300 border-r border-gray-800 z-50">
+        <div>
+            <!-- Logo -->
+            <div class="h-20 flex items-center justify-center border-b border-gray-800 group-hover:justify-start group-hover:px-6 overflow-hidden">
+                <i class="fas fa-tv text-accent text-2xl"></i>
+                <span class="ml-4 font-bold text-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">MediaSync</span>
+            </div>
+            <!-- Links -->
+            <nav class="mt-6 flex flex-col gap-2 px-3">
+                <a href="#" class="flex items-center px-3 py-3 bg-gray-800/50 rounded-lg text-accent border-l-4 border-accent overflow-hidden">
+                    <i class="fas fa-home text-lg w-6 text-center"></i>
+                    <span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-semibold">Home</span>
+                </a>
+                <a href="#" class="flex items-center px-3 py-3 hover:bg-gray-800/50 rounded-lg text-textMuted hover:text-white transition-colors overflow-hidden">
+                    <i class="fab fa-youtube text-lg w-6 text-center"></i>
+                    <span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-semibold">Canais de Mídia</span>
+                </a>
+                <a href="#" class="flex items-center px-3 py-3 hover:bg-gray-800/50 rounded-lg text-textMuted hover:text-white transition-colors overflow-hidden">
+                    <i class="fas fa-users-cog text-lg w-6 text-center"></i>
+                    <span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-semibold">Controle de Acesso</span>
+                </a>
+            </nav>
+        </div>
+        <!-- Perfil Logado -->
+        <div class="p-4 border-t border-gray-800 overflow-hidden flex items-center">
+            <img src="https://i.pravatar.cc/150?img=11" alt="User" class="w-10 h-10 rounded-full border-2 border-accent">
+            <div class="ml-3 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                <p class="text-sm font-bold">Admin HUD</p>
+                <p class="text-xs text-textMuted text-accent">Owner</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-1 flex flex-col h-full overflow-y-auto relative">
+        
+        <!-- HERO SECTION (O Telão) -->
+        <section class="relative w-full h-80 lg:h-[450px] flex-shrink-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center">
+            <div class="absolute inset-0 hero-gradient"></div>
+            <div class="absolute bottom-0 p-8 lg:p-12 w-full">
+                <span class="bg-accent text-white text-xs font-bold px-3 py-1 rounded-sm uppercase tracking-wider shadow-[0_0_10px_rgba(0,168,225,0.5)]">
+                    <i class="fas fa-circle text-[8px] animate-pulse text-red-500 mr-1"></i> Transmitindo Agora
+                </span>
+                <h1 class="text-4xl lg:text-6xl font-bold mt-4 mb-2 tracking-tight">Cyberpunk Lofi Mix</h1>
+                <p class="text-textMuted max-w-2xl text-sm lg:text-base mb-6">Transmissão em alta resolução (4K) sincronizada para todos os avatares no ambiente. Áudio estéreo espacial ativado.</p>
+                
+                <div class="flex gap-4">
+                    <button id="playBtn" onclick="togglePlay()" class="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded flex items-center gap-2 transition transform hover:scale-105">
+                        <i class="fas fa-play" id="playIcon"></i> <span id="playText">Reproduzir</span>
+                    </button>
+                    <button class="glass-panel border border-gray-600 hover:border-accent text-white font-semibold py-3 px-8 rounded flex items-center gap-2 transition group">
+                        <i class="fas fa-sync-alt group-hover:animate-spin text-accent"></i> Sincronizar
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÕES INFERIORES -->
+        <section class="p-8 lg:p-12 space-y-12">
+            
+            <!-- Carrossel de Mídias -->
+            <div>
+                <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-layer-group text-accent"></i> Fontes de Mídia (Canais)</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Card 1 -->
+                    <div class="aspect-video bg-secondary rounded-lg cursor-pointer overflow-hidden relative group border border-transparent hover:border-accent transition-all duration-300 transform hover:-translate-y-1 shadow-lg">
+                        <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=500&auto=format&fit=crop" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent flex items-end p-4">
+                            <h3 class="font-bold"><i class="fab fa-youtube text-red-500"></i> YouTube Web</h3>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="aspect-video bg-secondary rounded-lg cursor-pointer overflow-hidden relative group border border-transparent hover:border-accent transition-all duration-300 transform hover:-translate-y-1 shadow-lg">
+                        <div class="w-full h-full bg-blue-900/20 flex items-center justify-center text-4xl text-blue-500 group-hover:scale-110 transition">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent flex items-end p-4">
+                            <h3 class="font-bold">Navegador Livre</h3>
+                        </div>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="aspect-video bg-secondary rounded-lg cursor-pointer overflow-hidden relative group border border-transparent hover:border-accent transition-all duration-300 transform hover:-translate-y-1 shadow-lg">
+                        <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent flex items-end p-4">
+                            <h3 class="font-bold"><i class="fas fa-broadcast-tower text-green-500"></i> Rádio / Shoutcast</h3>
+                        </div>
+                    </div>
+                    <!-- Card 4 -->
+                    <div class="aspect-video bg-secondary rounded-lg cursor-pointer overflow-hidden relative group border border-transparent hover:border-accent transition-all duration-300 transform hover:-translate-y-1 shadow-lg">
+                        <div class="w-full h-full bg-gray-800 flex items-center justify-center text-4xl text-gray-500 group-hover:text-accent transition">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent flex items-end p-4">
+                            <h3 class="font-bold">Adicionar Mídia</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel de Controle (Inspirado no SL) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Controle de Acesso -->
+                <div class="bg-secondary p-6 rounded-xl border border-gray-800 shadow-xl">
+                    <h2 class="text-lg font-bold mb-6 flex items-center gap-2 border-b border-gray-800 pb-3">
+                        <i class="fas fa-shield-alt text-accent"></i> Controle de Acesso da Tela
+                    </h2>
+                    <div class="space-y-4">
+                        <label class="flex items-center justify-between p-3 bg-primary rounded cursor-pointer border border-accent/30 hover:border-accent transition">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-crown text-yellow-500 w-5"></i>
+                                <span>Apenas Dono (Owner)</span>
+                            </div>
+                            <input type="radio" name="access" class="w-5 h-5 accent-accent" checked>
+                        </label>
+                        <label class="flex items-center justify-between p-3 bg-primary rounded cursor-pointer border border-transparent hover:border-gray-600 transition">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-users text-blue-400 w-5"></i>
+                                <span>Apenas Grupo do Terreno</span>
+                            </div>
+                            <input type="radio" name="access" class="w-5 h-5 accent-accent">
+                        </label>
+                        <label class="flex items-center justify-between p-3 bg-primary rounded cursor-pointer border border-transparent hover:border-gray-600 transition">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-globe-americas text-green-400 w-5"></i>
+                                <span>Público (Qualquer Avatar)</span>
+                            </div>
+                            <input type="radio" name="access" class="w-5 h-5 accent-accent">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Efeitos de Ambiente (Smart TV Features) -->
+                <div class="bg-secondary p-6 rounded-xl border border-gray-800 shadow-xl">
+                    <h2 class="text-lg font-bold mb-6 flex items-center gap-2 border-b border-gray-800 pb-3">
+                        <i class="fas fa-magic text-accent"></i> Ambientação & Tela
+                    </h2>
+                    
+                    <div class="mb-6">
+                        <label class="flex justify-between text-sm text-textMuted mb-2">
+                            <span>Luz de Fundo (Ambilight)</span>
+                            <span class="text-accent">Ligado</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <button class="w-8 h-8 rounded-full bg-red-500 border-2 border-transparent hover:scale-110 transition"></button>
+                            <button class="w-8 h-8 rounded-full bg-[#00A8E1] border-2 border-white shadow-[0_0_10px_#00A8E1] hover:scale-110 transition"></button>
+                            <button class="w-8 h-8 rounded-full bg-purple-500 border-2 border-transparent hover:scale-110 transition"></button>
+                            <button class="w-8 h-8 rounded-full bg-green-500 border-2 border-transparent hover:scale-110 transition"></button>
+                            <button class="w-8 h-8 rounded-full bg-gray-700 border-2 border-transparent flex items-center justify-center hover:scale-110 transition"><i class="fas fa-ban text-xs"></i></button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-textMuted mb-2">Proporção da Tela (Aspect Ratio)</label>
+                        <div class="flex bg-primary rounded p-1">
+                            <button class="flex-1 py-2 text-sm bg-secondary rounded shadow text-white font-semibold">16:9 (Widescreen)</button>
+                            <button class="flex-1 py-2 text-sm text-textMuted hover:text-white transition">21:9 (Cinema)</button>
+                            <button class="flex-1 py-2 text-sm text-textMuted hover:text-white transition">4:3 (Clássico)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </section>
+    </main>
+
+    <!-- JavaScript Simples para Interatividade do Botão de Play -->
+    <script>
+        let isPlaying = false;
+        
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playBtn');
+            const icon = document.getElementById('playIcon');
+            const text = document.getElementById('playText');
+            
+            if(isPlaying) {
+                icon.className = 'fas fa-pause';
+                text.innerText = 'Pausar';
+                btn.classList.add('bg-accent', 'text-white');
+                btn.classList.remove('bg-white', 'text-black');
+            } else {
+                icon.className = 'fas fa-play';
+                text.innerText = 'Reproduzir';
+                btn.classList.remove('bg-accent', 'text-white');
+                btn.classList.add('bg-white', 'text-black');
+            }
+        }
+    </script>
+</body>
+</html>

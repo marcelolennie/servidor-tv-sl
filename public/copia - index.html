@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>TV Second Life - Player</title>
+    <style>
+        /* Removemos as bordas para o vídeo ocupar a tela toda da TV no SL */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: Arial, sans-serif; }
+        
+        /* O iframe do YouTube vai ocupar 100vw e 100vh */
+        #player { width: 100vw; height: 100vh; pointer-events: none; /* Bloqueia o clique direto no vídeo para não desincronizar */ }
+        
+        /* O menu intuitivo de controles que só aparece quando passa o mouse */
+        #controles {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8); padding: 15px; border-radius: 10px;
+            display: flex; gap: 10px; z-index: 10; opacity: 0; transition: opacity 0.3s;
+        }
+        body:hover #controles { opacity: 1; }
+
+        input { padding: 8px; width: 300px; border-radius: 5px; border: none; outline: none; }
+        button { padding: 8px 15px; cursor: pointer; border-radius: 5px; border: none; background: #e53935; color: white; font-weight: bold; }
+        button:hover { background: #ff5252; }
+    </style>
+</head>
+<body>
+
+    <div id="player"></div>
+
+    <!-- Interface Intuitiva para o Usuário -->
+    <div id="controles">
+        <input type="text" id="linkVideo" placeholder="Cole o link do YouTube aqui...">
+        <button onclick="mudarVideo()">Tocar Novo</button>
+        <button onclick="togglePlay()">Play / Pause</button>
+    </div>
+
+    <!-- Carrega o Socket.io (que faz a conexão em tempo real) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Pega o ID da sala direto da URL. Isso será automático no Second Life!
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('room') || 'sala-teste';
+
+        const socket = io();
+        let player;
+        let videoAtual = '';
+        let isPlaying = false;
+        let isReady = false;
+
+        // 1. Carrega a API do YouTube
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '100%', width: '100%',
+                videoId: 'dQw4w9WgXcQ', // Vídeo padrão
+                playerVars: { 'controls': 0, 'disablekb': 1, 'rel': 0 },
+                events: { 'onReady': onPlayerReady }
+            });
+        }
+
+        function onPlayerReady(event) {
+            isReady = true;
+            socket.emit('joinRoom', roomId); // Avisa o servidor: "Entrei na sala X"
+        }
+
+        // 2. Escuta as ordens do Servidor (A Mágica da Sincronização)
+        socket.on('sync', (data) => {
+            if (!isReady) return;
+
+            // Se for um vídeo diferente, carrega o novo
+            if (data.currentVideoId !== videoAtual) {
+                videoAtual = data.currentVideoId;
+                player.loadVideoById(videoAtual, data.currentTime);
+            } else {
+                // Se o tempo da tela estiver diferente do servidor em mais de 2s, força o pulo
+                const tempoTela = player.getCurrentTime() || 0;
+                if (Math.abs(tempoTela - data.currentTime) > 2) {
+                    player.seekTo(data.currentTime);
+                }
+            }
+
+            // Sincroniza Play/Pause
+            if (data.isPlaying && !isPlaying) player.playVideo();
+            else if (!data.isPlaying && isPlaying) player.pauseVideo();
+            
+            isPlaying = data.isPlaying;
+        });
+
+        // 3. Funções dos Botões (Envia ordens para o servidor)
+        function mudarVideo() {
+            const link = document.getElementById('linkVideo').value;
+            let videoId = '';
+            
+            // Pega só o código do vídeo, independente de como o usuário colou o link
+            if (link.includes('v=')) videoId = link.split('v=')[1].substring(0,11);
+            else if (link.includes('youtu.be/')) videoId = link.split('youtu.be/')[1].substring(0,11);
+            
+            if (videoId) {
+                socket.emit('command', { roomId: roomId, action: 'changeVideo', videoId: videoId });
+                document.getElementById('linkVideo').value = ''; // Limpa o campo
+            }
+        }
+
+        function togglePlay() {
+            const acao = isPlaying ? 'pause' : 'play';
+            socket.emit('command', { roomId: roomId, action: acao, time: player.getCurrentTime() });
+        }
+    </script>
+</body>
+</html>
