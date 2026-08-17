@@ -3,155 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediaSync Premium TV</title>
+    <title>Arosani MediaSL - Smart OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: #0F171E; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body, html { margin: 0; padding: 0; height: 100%; background: #050505; overflow: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; color: white; user-select: none; }
         
-        /* O Vídeo de Fundo */
-        #player-container { position: absolute; inset: 0; z-index: 1; }
-        #player-overlay { position: absolute; inset: 0; z-index: 2; background: rgba(15, 23, 30, 0.65); backdrop-filter: blur(5px); transition: all 0.5s; }
+        /* PLAYER NO FUNDO */
+        #player-container { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
         
-        /* Esconde a Dashboard quando o vídeo está em Fullscreen */
-        .video-mode #player-overlay { background: transparent; backdrop-filter: none; }
-        .video-mode #ui-layer { opacity: 0; pointer-events: none; }
+        /* TELA INICIAL (HOME) COM OS APPS */
+        #home-screen { position: absolute; inset: 0; z-index: 20; background: radial-gradient(circle at top right, #1a2a3a, #050505); display: flex; flex-direction: column; transition: opacity 0.5s; }
+        
+        /* TELA DE BUSCA (YOUTUBE) */
+        #search-screen { position: absolute; inset: 0; z-index: 15; background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(10px); display: none; flex-direction: column; padding: 2rem; }
 
-        /* A Interface (UI) */
-        #ui-layer { position: relative; z-index: 10; height: 100%; display: flex; transition: opacity 0.5s; color: white; }
+        /* BARRA INFERIOR DE CONTROLES (HOVER) */
+        #bottom-bar-trigger { position: absolute; bottom: 0; left: 0; right: 0; height: 80px; z-index: 29; }
+        #bottom-bar { position: absolute; bottom: -100px; left: 0; right: 0; z-index: 30; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px 40px; display: flex; flex-direction: column; gap: 10px; }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #00A8E1; border-radius: 10px; }
+        /* Área de gatilho faz a barra subir */
+        #bottom-bar-trigger:hover + #bottom-bar, #bottom-bar:hover { bottom: 0; }
+
+        /* ESTILOS CUSTOMIZADOS (Sliders) */
+        input[type=range] { -webkit-appearance: none; background: transparent; width: 100%; cursor: pointer; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #00A8E1; margin-top: -5px; transition: transform 0.1s; }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+        
+        .app-card { transition: all 0.2s; }
+        .app-card:hover { transform: translateY(-10px) scale(1.05); box-shadow: 0 10px 25px rgba(0, 168, 225, 0.4); border-color: #00A8E1; }
     </style>
 </head>
 <body>
 
-    <!-- PLAYER DO YOUTUBE NO FUNDO -->
+    <!-- 1. O VÍDEO -->
     <div id="player-container"><div id="player"></div></div>
-    <div id="player-overlay"></div>
 
-    <!-- DASHBOARD UI -->
-    <div id="ui-layer">
-        
-        <!-- SIDEBAR (Menu Lateral) -->
-        <aside class="w-20 hover:w-64 bg-[#1A242F] border-r border-gray-800 transition-all duration-300 group flex flex-col justify-between overflow-hidden shadow-2xl">
-            <div>
-                <div class="h-20 flex items-center justify-center border-b border-gray-800 group-hover:justify-start group-hover:px-6">
-                    <i class="fas fa-tv text-[#00A8E1] text-2xl"></i>
-                    <span class="ml-4 font-bold text-xl opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity">AVEN SX</span>
-                </div>
-                <nav class="mt-6 flex flex-col gap-2 px-3">
-                    <button class="flex items-center p-3 bg-[#0F171E] rounded-lg text-[#00A8E1] border-l-4 border-[#00A8E1]">
-                        <i class="fas fa-home text-lg w-6"></i>
-                        <span class="ml-4 font-semibold opacity-0 group-hover:opacity-100 whitespace-nowrap">Início</span>
-                    </button>
-                    <button class="flex items-center p-3 hover:bg-[#0F171E] rounded-lg text-gray-400 hover:text-white transition">
-                        <i class="fas fa-cog text-lg w-6"></i>
-                        <span class="ml-4 font-semibold opacity-0 group-hover:opacity-100 whitespace-nowrap">Ajustes da TV</span>
-                    </button>
-                </nav>
-            </div>
-            <div class="p-4 border-t border-gray-800 flex items-center">
-                <div class="w-10 h-10 rounded-full bg-[#00A8E1] flex justify-center items-center font-bold text-white"><i class="fas fa-user-shield"></i></div>
-                <div class="ml-3 opacity-0 group-hover:opacity-100 whitespace-nowrap">
-                    <p class="text-sm font-bold">Admin/Dono</p>
-                </div>
-            </div>
-        </aside>
+    <!-- 2. TELA INICIAL (SMART TV HOME) -->
+    <div id="home-screen">
+        <div class="flex justify-between items-center p-8">
+            <h1 class="text-2xl font-bold tracking-widest"><i class="fas fa-tv text-[#00A8E1]"></i> AVEN <span class="text-gray-400">OS</span></h1>
+            <div id="clock" class="text-xl font-light">00:00</div>
+        </div>
 
-        <!-- ÁREA PRINCIPAL -->
-        <main class="flex-1 p-8 overflow-y-auto relative">
+        <div class="flex-1 flex flex-col justify-center items-center gap-10">
+            <h2 class="text-4xl font-light mb-4">O que você quer acessar?</h2>
             
-            <!-- TOPO: Barra de Busca de Músicas/Vídeos -->
-            <header class="flex gap-4 items-center mb-10 max-w-4xl mx-auto">
-                <div class="flex-1 flex bg-[#1A242F] border border-gray-700 rounded-full overflow-hidden shadow-lg p-1">
-                    <input type="text" id="searchInput" placeholder="Pesquisar no YouTube (Músicas, clipes, filmes...)" class="w-full bg-transparent text-white px-6 py-3 outline-none" onkeypress="handleEnter(event)">
-                    <button onclick="buscarNoYouTube()" class="bg-[#00A8E1] hover:bg-blue-500 text-white px-8 py-2 rounded-full font-bold transition flex items-center gap-2">
-                        <i class="fas fa-search"></i> Buscar
-                    </button>
+            <div class="flex gap-6">
+                <!-- APP YOUTUBE -->
+                <div onclick="abrirBusca()" class="app-card bg-gray-900 border border-gray-700 w-48 h-48 rounded-2xl flex flex-col items-center justify-center cursor-pointer group">
+                    <i class="fab fa-youtube text-5xl text-gray-500 group-hover:text-red-500 transition mb-3"></i>
+                    <span class="font-bold">YouTube</span>
                 </div>
-                <!-- Botão Toggle de Tela -->
-                <button onclick="esconderDashboard()" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-full text-sm font-bold backdrop-blur transition border border-white/20">
-                    <i class="fas fa-expand"></i> Ocultar Menu
-                </button>
-            </header>
-
-            <!-- RESULTADOS DA BUSCA (A Mágica) -->
-            <section id="resultsSection" class="mb-10 max-w-6xl mx-auto hidden">
-                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i class="fab fa-youtube text-red-500"></i> Resultados da Pesquisa</h2>
-                <div id="videoGrid" class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <!-- Os vídeos aparecem aqui dinamicamente -->
-                </div>
-            </section>
-
-            <!-- DASHBOARD PADRÃO (Permissões e Controles Atuais) -->
-            <section id="defaultDashboard" class="max-w-4xl mx-auto space-y-8">
                 
-                <!-- Controle do Vídeo Atual -->
-                <div class="bg-[#1A242F] p-8 rounded-2xl border border-gray-800 flex items-center justify-between shadow-2xl">
-                    <div>
-                        <h2 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Tocando Agora na Sala</h2>
-                        <p class="text-2xl font-bold text-white mb-4">Sincronização em Tempo Real Ativada</p>
-                        <div class="flex gap-3">
-                            <button onclick="togglePlay()" id="btnPlay" class="bg-[#00A8E1] hover:bg-blue-400 text-white font-bold px-6 py-2 rounded shadow-lg transition flex items-center gap-2">
-                                <i class="fas fa-play" id="iconPlay"></i> <span id="txtPlay">Play</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="text-right hidden md:block">
-                        <div class="text-5xl text-[#00A8E1]/20"><i class="fas fa-satellite-dish"></i></div>
-                    </div>
+                <!-- APP TWITCH (Visual/Futuro) -->
+                <div class="app-card bg-gray-900 border border-gray-700 w-48 h-48 rounded-2xl flex flex-col items-center justify-center cursor-pointer group">
+                    <i class="fab fa-twitch text-5xl text-gray-500 group-hover:text-purple-500 transition mb-3"></i>
+                    <span class="font-bold">Twitch</span>
                 </div>
 
-                <!-- Painel de Smart TV -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Permissões -->
-                    <div class="bg-[#1A242F] p-6 rounded-xl border border-gray-800">
-                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-shield-alt text-[#00A8E1]"></i> Acesso à TV (HUD)</h3>
-                        <div class="space-y-3">
-                            <label class="flex items-center gap-3 p-3 bg-[#0F171E] rounded border border-[#00A8E1]/50 cursor-pointer">
-                                <input type="radio" name="perm" checked class="accent-[#00A8E1]"><i class="fas fa-crown text-yellow-500"></i> Apenas Dono
-                            </label>
-                            <label class="flex items-center gap-3 p-3 bg-[#0F171E] rounded cursor-pointer">
-                                <input type="radio" name="perm" class="accent-[#00A8E1]"><i class="fas fa-users text-blue-400"></i> Grupo da Land
-                            </label>
-                        </div>
-                    </div>
-                    <!-- Ambilight & Aspect Ratio -->
-                    <div class="bg-[#1A242F] p-6 rounded-xl border border-gray-800">
-                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-lightbulb text-[#00A8E1]"></i> Ambientação (Ambilight)</h3>
-                        <div class="flex gap-3 mb-6">
-                            <button class="w-8 h-8 rounded-full bg-red-500 hover:scale-110 transition"></button>
-                            <button class="w-8 h-8 rounded-full bg-[#00A8E1] border-2 border-white shadow-[0_0_15px_#00A8E1] hover:scale-110 transition"></button>
-                            <button class="w-8 h-8 rounded-full bg-purple-500 hover:scale-110 transition"></button>
-                            <button class="w-8 h-8 rounded-full bg-green-500 hover:scale-110 transition"></button>
-                        </div>
-                        <h3 class="text-sm font-bold text-gray-400 mb-2">Formato de Tela</h3>
-                        <div class="flex gap-2">
-                            <button class="bg-[#00A8E1] px-3 py-1 rounded text-xs font-bold">16:9</button>
-                            <button class="bg-[#0F171E] px-3 py-1 rounded text-xs font-bold">21:9</button>
-                        </div>
-                    </div>
+                <!-- APP NAVEGADOR (Visual/Futuro) -->
+                <div class="app-card bg-gray-900 border border-gray-700 w-48 h-48 rounded-2xl flex flex-col items-center justify-center cursor-pointer group">
+                    <i class="fas fa-globe text-5xl text-gray-500 group-hover:text-blue-400 transition mb-3"></i>
+                    <span class="font-bold">Web Browser</span>
                 </div>
-            </section>
-        </main>
+            </div>
+        </div>
     </div>
 
-    <!-- SOCKET.IO & YOUTUBE API -->
+    <!-- 3. TELA DE BUSCA (YOUTUBE) -->
+    <div id="search-screen">
+        <div class="flex gap-4 items-center mb-8 max-w-4xl mx-auto w-full mt-10">
+            <button onclick="voltarHome()" class="bg-gray-800 hover:bg-gray-700 p-4 rounded-full transition"><i class="fas fa-arrow-left"></i></button>
+            <div class="flex-1 flex bg-gray-900 border border-gray-700 rounded-full overflow-hidden p-1 shadow-2xl">
+                <input type="text" id="searchInput" placeholder="Pesquisar músicas, filmes, clipes..." class="w-full bg-transparent text-white px-6 py-3 outline-none text-lg" onkeypress="handleEnter(event)">
+                <button onclick="buscarNoYouTube()" class="bg-[#00A8E1] hover:bg-blue-500 px-8 py-2 rounded-full font-bold transition">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="videoGrid" class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto w-full overflow-y-auto pb-20">
+            <!-- Cards de pesquisa aparecem aqui -->
+        </div>
+    </div>
+
+    <!-- 4. BARRA DE CONTROLE INFERIOR (HOVER) -->
+    <div id="bottom-bar-trigger"></div> <!-- Área invisível para ativar o hover -->
+    <div id="bottom-bar">
+        
+        <!-- LINHA DO TEMPO (SEEKBAR) -->
+        <div class="flex items-center gap-4 w-full">
+            <span id="time-current" class="text-xs text-gray-300 w-10 text-right">0:00</span>
+            <input type="range" id="progressBar" value="0" min="0" max="100" step="0.1" onchange="seekVideo(this.value)">
+            <span id="time-total" class="text-xs text-gray-300 w-10">0:00</span>
+        </div>
+
+        <!-- BOTÕES DE CONTROLE -->
+        <div class="flex items-center justify-between mt-2">
+            
+            <!-- ESQUERDA: Home e Busca -->
+            <div class="flex gap-4">
+                <button onclick="voltarHome()" class="text-gray-400 hover:text-white transition"><i class="fas fa-home text-xl"></i></button>
+                <button onclick="abrirBusca()" class="text-gray-400 hover:text-white transition"><i class="fas fa-search text-xl"></i></button>
+            </div>
+
+            <!-- CENTRO: Controles Principais -->
+            <div class="flex items-center gap-6">
+                <button onclick="togglePlay()" class="w-12 h-12 rounded-full bg-white text-black hover:scale-110 transition flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                    <i class="fas fa-play text-xl ml-1" id="iconPlay"></i>
+                </button>
+            </div>
+
+            <!-- DIREITA: Volume (Local) -->
+            <div class="flex items-center gap-3 w-32">
+                <i class="fas fa-volume-up text-gray-400" id="iconVolume"></i>
+                <input type="range" id="volumeBar" value="100" min="0" max="100" oninput="mudarVolume(this.value)">
+            </div>
+        </div>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        // RELÓGIO DA HOME
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }, 1000);
+
+        // NAVEGAÇÃO DAS TELAS
+        function voltarHome() {
+            document.getElementById('home-screen').style.display = 'flex';
+            document.getElementById('search-screen').style.display = 'none';
+        }
+        function abrirBusca() {
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('search-screen').style.display = 'flex';
+        }
+        function verVideo() {
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('search-screen').style.display = 'none';
+        }
+
+        // SOCKET E YOUTUBE
         const urlParams = new URLSearchParams(window.location.search);
         const roomId = urlParams.get('room') || 'tv-teste';
-
         const socket = io();
         let player;
         let isReady = false;
         let isPlaying = false;
         let currentVideoId = '';
+        let duration = 0;
 
-        // 1. Iniciar YouTube
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         document.head.appendChild(tag);
@@ -159,33 +163,70 @@
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 height: '100%', width: '100%',
-                videoId: 'fhiKEaCndG0',
-                playerVars: { 'controls': 0, 'disablekb': 1, 'rel': 0, 'modestbranding': 1 },
+                videoId: '',
+                playerVars: { 'controls': 0, 'disablekb': 1, 'rel': 0, 'modestbranding': 1, 'showinfo': 0 },
                 events: {
-                    'onReady': () => { 
-                        isReady = true; 
-                        socket.emit('joinRoom', roomId); 
-                    },
+                    'onReady': () => { isReady = true; socket.emit('joinRoom', roomId); },
                     'onStateChange': (event) => {
-                        // Se o vídeo terminar, volta a mostrar o menu
-                        if (event.data === YT.PlayerState.ENDED) {
-                            document.body.classList.remove('video-mode');
+                        if(event.data === YT.PlayerState.PLAYING) {
+                            duration = player.getDuration();
+                            atualizarTempos(duration, 'time-total');
                         }
+                        if(event.data === YT.PlayerState.ENDED) voltarHome();
                     }
                 }
             });
         }
 
-        // 2. Sincronismo (Receber Ordens)
+        // ATUALIZAR BARRA DE PROGRESSO EM TEMPO REAL
+        setInterval(() => {
+            if (isReady && isPlaying && player.getCurrentTime) {
+                const current = player.getCurrentTime();
+                if(duration > 0) {
+                    const percent = (current / duration) * 100;
+                    document.getElementById('progressBar').value = percent;
+                    atualizarTempos(current, 'time-current');
+                }
+            }
+        }, 1000);
+
+        function atualizarTempos(segundos, elemento) {
+            const min = Math.floor(segundos / 60);
+            const sec = Math.floor(segundos % 60).toString().padStart(2, '0');
+            document.getElementById(elemento).innerText = `${min}:${sec}`;
+        }
+
+        // CONTROLES DE VÍDEO
+        function seekVideo(percent) {
+            if(!isReady || duration === 0) return;
+            const tempoCalculado = (percent / 100) * duration;
+            socket.emit('command', { roomId: roomId, action: 'play', time: tempoCalculado });
+        }
+
+        function mudarVolume(val) {
+            if(!isReady) return;
+            player.setVolume(val); // LOCAL: não envia pro socket!
+            const icon = document.getElementById('iconVolume');
+            if(val == 0) icon.className = "fas fa-volume-mute text-gray-400";
+            else if(val < 50) icon.className = "fas fa-volume-down text-gray-400";
+            else icon.className = "fas fa-volume-up text-gray-400";
+        }
+
+        function togglePlay() {
+            const time = player.getCurrentTime() || 0;
+            const acao = isPlaying ? 'pause' : 'play';
+            socket.emit('command', { roomId: roomId, action: acao, time: time });
+        }
+
+        // SINCRONISMO (RECEBER)
         socket.on('sync', (data) => {
             if (!isReady) return;
 
-            if (data.currentVideoId !== currentVideoId) {
+            if (data.currentVideoId && data.currentVideoId !== currentVideoId) {
                 currentVideoId = data.currentVideoId;
                 player.loadVideoById(currentVideoId, data.currentTime);
-                // Quando muda o vídeo, esconde a dashboard automaticamente para assistir!
-                document.body.classList.add('video-mode'); 
-            } else {
+                verVideo(); // Esconde as telas e mostra o vídeo
+            } else if (data.currentVideoId) {
                 const tempoTela = player.getCurrentTime() || 0;
                 if (Math.abs(tempoTela - data.currentTime) > 2) {
                     player.seekTo(data.currentTime);
@@ -193,102 +234,50 @@
             }
 
             isPlaying = data.isPlaying;
+            const icon = document.getElementById('iconPlay');
             if (isPlaying) {
                 player.playVideo();
-                atualizarBotaoPlay(true);
+                icon.className = 'fas fa-pause text-xl';
             } else {
                 player.pauseVideo();
-                atualizarBotaoPlay(false);
+                icon.className = 'fas fa-play text-xl ml-1';
             }
         });
 
-        // 3. Botão Play/Pause (Enviar Ordem)
-        function togglePlay() {
-            const time = player.getCurrentTime() || 0;
-            const acao = isPlaying ? 'pause' : 'play';
-            socket.emit('command', { roomId: roomId, action: acao, time: time });
-        }
-
-        function atualizarBotaoPlay(tocando) {
-            const icon = document.getElementById('iconPlay');
-            const txt = document.getElementById('txtPlay');
-            if(tocando) {
-                icon.className = 'fas fa-pause';
-                txt.innerText = 'Pausar Mídia';
-            } else {
-                icon.className = 'fas fa-play';
-                txt.innerText = 'Tocar Mídia';
-            }
-        }
-
-        // 4. Sistema de Busca de Vídeos
+        // BUSCA
         function handleEnter(e) { if (e.key === 'Enter') buscarNoYouTube(); }
 
         function buscarNoYouTube() {
             const query = document.getElementById('searchInput').value;
-            
-            // Se o usuário colou um link direto do youtube
-            if (query.includes('youtube.com/') || query.includes('youtu.be/')) {
-                let vId = '';
-                if (query.includes('v=')) vId = query.split('v=')[1].substring(0,11);
-                else if (query.includes('youtu.be/')) vId = query.split('youtu.be/')[1].substring(0,11);
-                
-                if (vId) {
-                    socket.emit('command', { roomId: roomId, action: 'changeVideo', videoId: vId });
-                    document.getElementById('searchInput').value = '';
-                }
-                return;
-            }
-
-            // Se for texto comum, usa a busca do servidor
             if (query.trim() !== '') {
                 socket.emit('searchYouTube', query, roomId);
-                document.getElementById('resultsSection').classList.remove('hidden');
-                document.getElementById('defaultDashboard').classList.add('hidden');
-                document.getElementById('videoGrid').innerHTML = '<p class="text-[#00A8E1]">Procurando vídeos...</p>';
+                document.getElementById('videoGrid').innerHTML = '<div class="col-span-4 text-center mt-10"><i class="fas fa-circle-notch fa-spin text-3xl text-[#00A8E1]"></i></div>';
             }
         }
 
-        // Recebe os resultados da busca do servidor e desenha os "Cards" na tela
         socket.on('searchResults', (videos) => {
             const grid = document.getElementById('videoGrid');
             grid.innerHTML = '';
-            
             videos.forEach(vid => {
                 const card = document.createElement('div');
-                card.className = "bg-[#1A242F] rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#00A8E1] transition shadow-lg group";
+                card.className = "bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#00A8E1] transition shadow-lg group";
                 card.onclick = () => {
                     socket.emit('command', { roomId: roomId, action: 'changeVideo', videoId: vid.videoId });
-                    // Limpa a busca e volta ao dashboard
                     document.getElementById('searchInput').value = '';
-                    document.getElementById('resultsSection').classList.add('hidden');
-                    document.getElementById('defaultDashboard').classList.remove('hidden');
+                    verVideo();
                 };
-
                 card.innerHTML = `
                     <div class="relative">
                         <img src="${vid.image}" class="w-full aspect-video object-cover opacity-80 group-hover:opacity-100 transition">
-                        <div class="absolute bottom-2 right-2 bg-black/80 px-2 py-1 text-xs rounded font-bold">${vid.timestamp}</div>
+                        <div class="absolute bottom-2 right-2 bg-black/80 px-2 py-1 text-xs rounded font-bold text-white">${vid.timestamp}</div>
                     </div>
                     <div class="p-4">
-                        <h4 class="font-bold text-sm line-clamp-2 leading-tight mb-1 text-white group-hover:text-[#00A8E1] transition">${vid.title}</h4>
+                        <h4 class="font-bold text-sm text-white line-clamp-2 mb-1 group-hover:text-[#00A8E1] transition">${vid.title}</h4>
                         <p class="text-xs text-gray-400">${vid.author.name}</p>
                     </div>
                 `;
                 grid.appendChild(card);
             });
-        });
-
-        // 5. Modo de Exibição (Mostrar/Esconder Dashboard para ver o vídeo inteiro)
-        function esconderDashboard() {
-            document.body.classList.toggle('video-mode');
-        }
-
-        // Se o usuário mexer o mouse enquanto o vídeo estiver em Fullscreen (Dashboard oculta), o menu volta a aparecer
-        document.body.addEventListener('mousemove', () => {
-            if (document.body.classList.contains('video-mode')) {
-                document.body.classList.remove('video-mode');
-            }
         });
     </script>
 </body>
