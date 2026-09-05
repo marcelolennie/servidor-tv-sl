@@ -1,0 +1,85 @@
+╔══════════════════════════════════════════════════════════════╗
+║            REGRAS — HAND & FOOT CANASTA                       ║
+║            (Versão Padrão — 4 Jogadores, 2 Times)            ║
+╚══════════════════════════════════════════════════════════════╝
+
+━━━ OBJETIVO ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marcar mais pontos que o time adversário ao longo de 4 rodadas.
+Cada rodada termina quando um jogador "sai" (go out) ou o
+baralho de compra se esgota.
+
+━━━ BARALHO ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• 4 baralhos padrão de 54 cartas (52 + 2 curingas) = 216 cartas
+• Wilds: Curingas (50 pts) e Dois (2) de qualquer naipe (20 pts)
+• Red 3s (3♦ 3♥): bônus de 100 pts cada, baixados automaticamente
+• Black 3s (3♣ 3♠): só podem ser meldados em grupo, sem wilds
+
+━━━ DISTRIBUIÇÃO ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cada jogador recebe:
+  • HAND (Mão): 11 cartas — jogar primeiro
+  • FOOT (Pé): 11 cartas — jogar após esvaziar a mão
+O restante forma o STOCK (baralho de compra).
+A primeira carta não-wild do stock vira o DESCARTE.
+
+━━━ TURNO DE JOGO ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. COMPRAR (uma das opções):
+   a) Comprar 2 cartas do stock (opção normal)
+   b) Pegar o topo do descarte + 1 do stock (turno de abertura)
+   c) Pegar toda a pilha de descarte (se puder meldar o topo
+      imediatamente com 2 naturais na mão ou meld existente)
+
+2. MELDAR (opcional, pode fazer vários melds):
+   • Criar novo meld: 3+ cartas do mesmo rank (mín. 2 naturais)
+   • Adicionar a meld existente do time
+   • Wilds limitados: mais naturais que wilds no meld
+   • Primeira vez: pontos do meld devem atingir o mínimo da rodada
+
+3. DESCARTAR (obrigatório, 1 carta):
+   • Encerra o turno
+   • Se a mão ficou vazia, pega o FOOT no próximo turno
+   • Se meldou a última carta da mão, pega o FOOT imediatamente
+
+━━━ MÍNIMO PARA BAIXAR (por rodada) ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Rodada 1: 50 pontos
+  Rodada 2: 90 pontos
+  Rodada 3: 120 pontos
+  Rodada 4: 150 pontos
+
+━━━ MELDS E LIVROS (CANASTAS) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Meld: 3+ cartas do mesmo rank
+• Livro (Canasta): 7 cartas no mesmo meld
+  - LIVRO LIMPO (Clean): 7 naturais, sem wilds = +500 pts
+  - LIVRO SUJO (Dirty): 7 cartas incluindo wilds = +300 pts
+  - Livro de 2s puro (7 dois) = +2000 pts
+  - Livro de Curingas puro (7 curingas) = +2000 pts
+  - Livro wild misto (2s + curingas) = +1000 pts
+
+━━━ SAIR (GO OUT) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Para sair e encerrar a rodada, o time precisa:
+  ✓ Pelo menos 1 LIVRO LIMPO
+  ✓ Pelo menos 1 LIVRO SUJO
+  ✓ Mão e Foot completamente vazios
+Bônus: +100 pontos
+
+━━━ PONTUAÇÃO DAS CARTAS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Curinga ........... 50 pts
+  Dois (2) .......... 20 pts  (wild)
+  Ás (A) ............ 20 pts
+  8, 9, 10, J, Q, K . 10 pts
+  4, 5, 6, 7 ........  5 pts
+  Black 3 ...........  0 pts
+  Red 3 ............. 100 pts (bônus automático)
+
+━━━ PENALIDADES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Cartas na mão/foot quando a rodada termina: subtrai valor
+• Red 3s no foot não baixados: -100 pts cada
+
+━━━ VITÓRIA ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Após 4 rodadas, o time com maior pontuação total vence!
+
+━━━ DICAS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Priorize livros limpos — valem 500 vs 300 dos sujos
+• Guarde wilds para completar livros, não para abrir melds
+• Red 3s são bônus grátis — nunca os descarte!
+• Comunique com seu parceiro sobre quais ranks estão em jogo
+• Pegar a pilha de descarte pode ser muito vantajoso

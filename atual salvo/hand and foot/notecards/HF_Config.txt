@@ -1,0 +1,41 @@
+# ══════════════════════════════════════════════════════════════════
+# HF Config — Configuração do Hand & Foot Canasta
+# Edite este notecard para personalizar o jogo.
+# Linhas começando com # são comentários.
+# ══════════════════════════════════════════════════════════════════
+
+# Número de baralhos (54 cartas cada). Padrão: 4 (216 cartas)
+NUM_DECKS=4
+
+# Número de rodadas por partida
+NUM_ROUNDS=4
+
+# Pontuação de livros (canastas)
+CLEAN_BOOK=500
+DIRTY_BOOK=300
+
+# Bônus de Red 3s
+RED3_BONUS=100
+
+# Bônus por sair (go out)
+GO_OUT_BONUS=100
+
+# Mínimo para baixar por rodada (separado por vírgulas)
+# Rodada 1=50, Rodada 2=90, Rodada 3=120, Rodada 4=150
+MIN_MELD=50,90,120,150
+
+# ═══ UUIDs das Texturas ═══════════════════════════════════════════
+# Após fazer upload dos PNGs (cards_atlas_1.png, cards_atlas_2.png,
+# card_back.png) no Second Life, cole os UUIDs aqui.
+# Para obter o UUID: clique com botão direito no item no inventário
+# → "Copy Asset UUID" (requer permissão de desenvolvedor).
+# ══════════════════════════════════════════════════════════════════
+
+# Atlas 1 (cartas faceCode 0-31: 3♣ a 10♠)
+ATLAS1_UUID=0ba2b6e8-f35e-1545-24f0-d17e32999339
+
+# Atlas 2 (cartas faceCode 32-53: J♣ a Joker Preto)
+ATLAS2_UUID=a9a97a2d-dd8c-6489-fd14-ce5946041324
+
+# Verso da carta
+CARDBACK_UUID=9ba0f90e-7f3c-6d99-d998-a4237954831d

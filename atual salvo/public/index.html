@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SL TV Sync - Player</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      background: #000;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    #screen, #video-player {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      border: none;
+      display: none;
+    }
+    #overlay {
+      position: fixed;
+      top: 16px; left: 16px;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      z-index: 100;
+      pointer-events: none;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    #offline {
+      position: fixed; inset: 0;
+      display: flex;
+      align-items: center; justify-content: center;
+      flex-direction: column;
+      color: #fff;
+      background: #111;
+      z-index: 200;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top-color: #00d4ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hidden { display: none !important; }
+    .live-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      margin-right: 6px;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  </style>
+</head>
+<body>
+  <div id="overlay">
+    <div id="status"><span class="live-dot"></span>Connecting...</div>
+    <div id="title">SL TV Sync</div>
+  </div>
+
+  <iframe id="screen" allow="autoplay; encrypted-media; fullscreen"></iframe>
+  <video id="video-player" playsinline></video>
+
+  <div id="offline">
+    <div class="spinner"></div>
+    <div>Connecting to SL TV Sync...</div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const channelId = params.get('channel') || 'main-living-room';
+    const statusEl = document.getElementById('status');
+    const titleEl = document.getElementById('title');
+    const offlineEl = document.getElementById('offline');
+    const iframe = document.getElementById('screen');
+    const video = document.getElementById('video-player');
+
+    let currentState = null;
+    let syncInterval = null;
+
+    const socket = io({ transports: ['websocket', 'polling'] });
+
+    function showOffline(show) {
+      offlineEl.classList.toggle('hidden', !show);
+    }
+
+    function setTitle(t) {
+      titleEl.textContent = t || 'SL TV Sync';
+      document.title = (t || 'SL TV Sync') + ' - SL TV';
+    }
+
+    function applyYouTube(url, position, isPlaying) {
+      const u = new URL(url, location.href);
+      u.searchParams.set('autoplay', isPlaying ? '1' : '0');
+      u.searchParams.set('controls', '0');
+      u.searchParams.set('mute', '1');
+      u.searchParams.set('disablekb', '1');
+      u.searchParams.set('modestbranding', '1');
+      u.searchParams.set('rel', '0');
+      u.searchParams.set('start', Math.floor(position).toString());
+      const finalUrl = u.toString();
+
+      if (iframe.src !== finalUrl) {
+        iframe.style.display = 'block';
+        video.style.display = 'none';
+        video.pause();
+        iframe.src = finalUrl;
+      }
+    }
+
+    function applyDirectVideo(url, position, isPlaying) {
+      if (video.src !== url) {
+        video.src = url;
+        video.style.display = 'block';
+        iframe.style.display = 'none';
+      }
+      video.currentTime = position;
+      if (isPlaying) {
+        const p = video.play();
+        if (p) p.catch(() => {});
+      } else {
+        video.pause();
+      }
+    }
+
+    function applyState(state) {
+      currentState = state;
+      setTitle(state.title);
+      showOffline(false);
+
+      const sourceType = state.sourceType || 'youtube';
+      const isYT = sourceType === 'youtube' ||
+                   state.url.includes('youtube.com') ||
+                   state.url.includes('youtu.be');
+
+      if (isYT) {
+        applyYouTube(state.url, state.position, state.isPlaying);
+      } else {
+        applyDirectVideo(state.url, state.position, state.isPlaying);
+      }
+
+      statusEl.innerHTML = `<span class="live-dot"></span>${state.isPlaying ? 'Playing' : 'Paused'} · ${state.viewers || 0} viewers`;
+    }
+
+    socket.on('connect', () => {
+      socket.emit('join', channelId);
+      statusEl.textContent = 'Connected';
+    });
+
+    socket.on('disconnect', () => {
+      showOffline(true);
+      statusEl.textContent = 'Disconnected';
+    });
+
+    socket.on('tv:update', (state) => applyState(state));
+    socket.on('error', (msg) => console.error('Socket error:', msg));
+
+    syncInterval = setInterval(() => {
+      socket.emit('viewer:requestSync');
+    }, 30000);
+
+    fetch('/api/state/' + channelId)
+      .then(r => r.ok ? r.json() : null)
+      .then(state => { if (state) applyState(state); })
+      .catch(() => {});
+  </script>
+</body>
+</html>

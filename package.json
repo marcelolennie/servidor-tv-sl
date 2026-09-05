@@ -1,15 +1,10 @@
 {
-  "name": "sl-tv-sync",
+  "name": "servidor-tv-sl",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "test": "node test.js && node test-ws.js"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
@@ -17,11 +12,8 @@
   "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "socket.io": "^4.8.3"
-  },
-  "devDependencies": {
-    "socket.io-client": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "yt-search": "^2.13.1"
   }
 }

@@ -1,240 +1,75 @@
-/**
- * SL TV Sync Server
- * Backend central que coordena o que todos os viewers da TV assistem.
- */
-require('dotenv').config();
 const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
-const path = require('path');
-
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] }
-});
-
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+const http = require('http').createServer(app);
+const io = require('socket.io')(http, { cors: { origin: "*" } });
+const path = require('path');
+const ytSearch = require('yt-search'); // Biblioteca de busca do YouTube
 
 const PORT = process.env.PORT || 3000;
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'change-me-now';
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Salas de TV em memória (em produção, use Redis para escalar).
-const channels = new Map();
-const viewerCounts = new Map();
-
-function ensureChannel(channelId) {
-  if (!channels.has(channelId)) {
-    channels.set(channelId, {
-      channelId,
-      url: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&controls=0',
-      sourceType: 'youtube',
-      isPlaying: true,
-      position: 0,
-      lastUpdate: Date.now(),
-      volume: 80,
-      title: 'Welcome to SL TV Sync',
-      playlist: [],
-      currentIndex: 0
-    });
-    viewerCounts.set(channelId, 0);
-  }
-  return channels.get(channelId);
-}
-
-function getCurrentPosition(state) {
-  if (state.isPlaying && state.lastUpdate) {
-    const elapsed = (Date.now() - state.lastUpdate) / 1000;
-    return state.position + elapsed;
-  }
-  return state.position;
-}
-
-function broadcastState(channelId) {
-  const state = ensureChannel(channelId);
-  state.lastUpdate = Date.now();
-  state.position = getCurrentPosition(state);
-  io.to(channelId).emit('tv:update', {
-    ...state,
-    viewers: viewerCounts.get(channelId) || 0
-  });
-}
-
-function requireAdmin(req, res, next) {
-  const token = req.headers.authorization?.replace('Bearer ', '');
-  if (token !== ADMIN_SECRET) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  next();
-}
-
-function applyAction(state, data) {
-  const { action, url, sourceType, position, volume, title, index } = data;
-
-  if (title !== undefined) state.title = title;
-  if (volume !== undefined) state.volume = Math.max(0, Math.min(100, volume));
-
-  switch (action) {
-    case 'play':
-      state.isPlaying = true;
-      state.position = position !== undefined ? position : getCurrentPosition(state);
-      break;
-    case 'pause':
-      state.position = getCurrentPosition(state);
-      state.isPlaying = false;
-      break;
-    case 'seek':
-      state.position = position || 0;
-      break;
-    case 'change':
-      if (!url) throw new Error('url required');
-      state.url = url;
-      state.sourceType = sourceType || 'youtube';
-      state.position = 0;
-      state.isPlaying = true;
-      state.title = title || 'Untitled Stream';
-      break;
-    case 'stop':
-      state.isPlaying = false;
-      state.position = 0;
-      break;
-    case 'add':
-      if (!url) throw new Error('url required');
-      state.playlist.push({ url, sourceType: sourceType || 'youtube', title: title || 'Untitled' });
-      break;
-    case 'remove':
-      if (index !== undefined && index >= 0 && index < state.playlist.length) {
-        state.playlist.splice(index, 1);
-      }
-      break;
-    case 'next':
-      if (state.playlist.length > 0) {
-        state.currentIndex = (state.currentIndex + 1) % state.playlist.length;
-        const item = state.playlist[state.currentIndex];
-        state.url = item.url;
-        state.sourceType = item.sourceType || 'youtube';
-        state.title = item.title || 'Playlist Item';
-        state.position = 0;
-        state.isPlaying = true;
-      }
-      break;
-    case 'prev':
-      if (state.playlist.length > 0) {
-        state.currentIndex = (state.currentIndex - 1 + state.playlist.length) % state.playlist.length;
-        const item = state.playlist[state.currentIndex];
-        state.url = item.url;
-        state.sourceType = item.sourceType || 'youtube';
-        state.title = item.title || 'Playlist Item';
-        state.position = 0;
-        state.isPlaying = true;
-      }
-      break;
-    case 'clear':
-      state.playlist = [];
-      state.currentIndex = 0;
-      break;
-    default:
-      throw new Error('Unknown action');
-  }
-}
-
-app.get('/api/state', (req, res) => {
-  const channelId = req.query.channel || 'main-living-room';
-  const state = ensureChannel(channelId);
-  res.json({
-    ...state,
-    position: getCurrentPosition(state),
-    viewers: viewerCounts.get(channelId) || 0
-  });
-});
-
-app.get('/api/state/:channelId', (req, res) => {
-  const state = ensureChannel(req.params.channelId);
-  res.json({
-    ...state,
-    position: getCurrentPosition(state),
-    viewers: viewerCounts.get(req.params.channelId) || 0
-  });
-});
-
-app.get('/api/channels', (req, res) => {
-  const list = Array.from(channels.keys()).map(id => ({
-    channelId: id,
-    viewers: viewerCounts.get(id) || 0,
-    title: channels.get(id).title
-  }));
-  res.json(list);
-});
-
-app.post('/api/control', requireAdmin, (req, res) => {
-  try {
-    const channelId = req.body.channelId || 'main-living-room';
-    const state = ensureChannel(channelId);
-    applyAction(state, req.body);
-    broadcastState(channelId);
-    res.json(state);
-  } catch (e) {
-    res.status(400).json({ error: e.message });
-  }
-});
+const tvRooms = {};
 
 io.on('connection', (socket) => {
-  let channelId = 'main-living-room';
-
-  socket.on('join', (id) => {
-    if (id) channelId = id;
-    socket.join(channelId);
-    viewerCounts.set(channelId, (viewerCounts.get(channelId) || 0) + 1);
-    const state = ensureChannel(channelId);
-    socket.emit('tv:update', {
-      ...state,
-      position: getCurrentPosition(state),
-      viewers: viewerCounts.get(channelId) || 0
+    
+    // 1. Entrar na Sala
+    socket.on('joinRoom', (roomId) => {
+        socket.join(roomId);
+        if (!tvRooms[roomId]) {
+            tvRooms[roomId] = {
+                currentVideoId: 'fhiKEaCndG0', // Vídeo Cyberpunk inicial
+                currentTime: 0,
+                isPlaying: false,
+                lastUpdated: Date.now()
+            };
+        }
+        
+        const room = tvRooms[roomId];
+        let tempoAtual = room.currentTime;
+        if (room.isPlaying) {
+            tempoAtual += (Date.now() - room.lastUpdated) / 1000;
+        }
+        socket.emit('sync', { ...room, currentTime: tempoAtual });
     });
-    broadcastState(channelId);
-  });
 
-  socket.on('admin:control', (data) => {
-    if (data.secret !== ADMIN_SECRET) {
-      socket.emit('error', 'Unauthorized');
-      return;
-    }
-    const ch = data.channelId || channelId;
-    const state = ensureChannel(ch);
-    try {
-      applyAction(state, data);
-      broadcastState(ch);
-    } catch (e) {
-      socket.emit('error', e.message);
-    }
-  });
+    // 2. Comandos da TV (Play, Pause, Mudar Vídeo)
+    socket.on('command', (data) => {
+        const { roomId, action, videoId, time } = data;
+        if (!tvRooms[roomId]) return;
+        
+        const room = tvRooms[roomId];
 
-  socket.on('viewer:requestSync', () => {
-    const state = ensureChannel(channelId);
-    socket.emit('tv:update', {
-      ...state,
-      position: getCurrentPosition(state),
-      viewers: viewerCounts.get(channelId) || 0
+        if (action === 'play') {
+            room.isPlaying = true;
+            room.currentTime = time || room.currentTime;
+            room.lastUpdated = Date.now();
+        } else if (action === 'pause') {
+            room.isPlaying = false;
+            room.currentTime = time || room.currentTime;
+            room.lastUpdated = Date.now();
+        } else if (action === 'changeVideo') {
+            room.currentVideoId = videoId;
+            room.currentTime = 0;
+            room.isPlaying = true;
+            room.lastUpdated = Date.now();
+        }
+        
+        // Avisa a todos da sala
+        io.to(roomId).emit('sync', room);
     });
-  });
 
-  socket.on('disconnect', () => {
-    viewerCounts.set(channelId, Math.max(0, (viewerCounts.get(channelId) || 0) - 1));
-    broadcastState(channelId);
-  });
+    // 3. Sistema de Busca do YouTube (Pesquisa sem API Key!)
+    socket.on('searchYouTube', async (query, roomId) => {
+        try {
+            const r = await ytSearch(query);
+            const videos = r.videos.slice(0, 8); // Pega os 8 primeiros resultados
+            socket.emit('searchResults', videos); // Envia de volta para quem pesquisou
+        } catch(err) {
+            console.error("Erro na busca:", err);
+        }
+    });
 });
 
-app.get('/health', (req, res) => res.json({ ok: true, channels: channels.size }));
-
-if (require.main === module) {
-  server.listen(PORT, () => {
-    console.log(`SL TV Sync server running on port ${PORT}`);
-    console.log(`Dashboard: http://localhost:${PORT}/dashboard.html`);
-    console.log(`TV Player: http://localhost:${PORT}/`);
-  });
-}
-
-module.exports = { app, server, io, channels, viewerCounts };
+http.listen(PORT, () => {
+    console.log(`Servidor Premium rodando na porta ${PORT}`);
+});
